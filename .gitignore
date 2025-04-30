@@ -1,0 +1,12 @@
+# Ignore VS Code settings
+.vscode/
+
+# Ignore the journal file
+journal.txt
+
+# Ignore Python bytecode and caches
+__pycache__/
+*.py[cod]
+
+# Ignore pytest cache
+.pytest_cache/

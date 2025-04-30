@@ -50,67 +50,52 @@ class Board():
         for i in self.board:
             for j in i:
                 if j != None:
-                    if j.side == side:
-                        actions = j.get_actions(self.board)
+                    if j.side == side and not isinstance(j, King):
+                        actions = j.get_actions(self)
                         if len(actions) != 0:
-                            print([(move.start_pos, move.end_pos, str(move.peice)) for move in actions])
                             moves.extend(actions)
         return moves
 
-    def is_valid(board):
-        # STILL NEEDS WORK ----> HOW TO TELL IF A POSITION IS VALID?
-        if len(board) != 8 or len([True for row in board if len(row) == 8]) != 8:
-            return False
-        white_pieces = dict([(piece, 0) for piece in ['k','q','r','n','bb','wb','p']])
-        black_pieces = dict([(piece, 0) for piece in ['k','q','r','n','bb','wb','p']])
-        for row in board:
-            for square in row:
-                match square:
-                    case 'wk':
-                        white_pieces['k']+=1
-                    case 'wq':
-                        white_pieces['q']+=1
-                    case 'wn':
-                        white_pieces['n']+=1
-                    case 'wwb':
-                        white_pieces['wb']+=1
-                    case 'wbb':
-                        white_pieces['wbb']+=1
-                    case 'wp':
-                        white_pieces['p']+=1
-                    case 'bk':
-                        black_pieces['k']+=1
-                    case 'bq':
-                        black_pieces['q']+=1
-                    case 'bn':
-                        black_pieces['n']+=1
-                    case 'bwb':
-                        black_pieces['wb']+=1
-                    case 'bbb':
-                        black_pieces['wbb']+=1
-                    case 'bp':
-                        black_pieces['p']+=1
-                    case _:
-                        pass
-        
-        if white_pieces['k'] != 1 or black_pieces['k'] != 1:
-            return False
-        return True
-    
     def is_terminal(self):
-        # TODO: Return a boolean indicating whether the board is terminal or not.
+        # Get the kings
+        for row in self.board:
+            for square in row:
+                if square != None and isinstance(square, King):
+                    if square.side == 'w': white_king = square
+                    else: black_king = square
+                
+        # Get both players actions
+        white_actions = len(self.get_all_actions(side = 'w'))
+        black_actions = len(self.get_all_actions(side = 'b'))
 
-        # Check if white is in checkmate
-
-        pass
+        # Check for all results
+        if white_actions == 0 and not white_king.check:
+            return 'stalemate'
+        elif white_actions == 0 and white_king.check:
+            return 'white'
+        elif black_actions == 0 and not black_king.check:
+            return 'stalemate'
+        elif black_actions == 0 and black_king.check:
+            return 'white'
+        else:
+            return False
 
     def get_util(self):
-        # TODO: Return the evalutaion of the board
-        pass
-
+        eval = self.get_material(side = 'w') - self.get_material(side = 'b')
+        return eval
+    
     def get_material(self, side):
         # TODO: Return the value of the material for the specified side
-        pass
+        material = 0
+        for row in self.board:
+            for sq in row:
+                if sq != None:
+                    if sq.side == side:
+                        if isinstance(sq, Queen): material+=9
+                        if isinstance(sq, Rook): material+=5
+                        if isinstance(sq, Knight) or isinstance(sq, Bishop): material+=3
+                        if isinstance(sq, Pawn): material+=1
+        return material
 
     def __str__(self):
         board = self.board
