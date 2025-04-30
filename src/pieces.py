@@ -12,10 +12,13 @@ class King():
 		self.moved = False
 
 	def move(self, move, board):
-		board = board.board
-		board[self.pos[0]][self.pos[1]] = None
+		state = board.board
+		if move.castling != None:
+			rook = state[0 if move.peice.side == 'w' else 7][7 if move.castling == 'kingside' else 0]
+			rook.move(Move(rook, rook.pos, (0 if move.peice.side == 'w' else 7, 5 if move.castling == 'kingside' else 3)), board)
+		state[self.pos[0]][self.pos[1]] = None
 		self.pos = move.end_pos
-		board[move.end_pos[0]][move.end_pos[1]] = self 
+		state[move.end_pos[0]][move.end_pos[1]] = self 
 		self.moved = True
 
 	def get_actions(self, board):
@@ -200,14 +203,14 @@ class Knight():
 		self.pos = pos
 
 	def move(self, move, board):
-		board = board.board
+		state = board.board
 		pos = move.end_pos
-		board[self.pos[0]][self.pos[1]] = None
+		state[self.pos[0]][self.pos[1]] = None
 		self.pos = pos
-		board[pos[0]][pos[1]] = self 
+		state[pos[0]][pos[1]] = self 
 
 		# Get the enemy kings position and see if hes in check
-		king = get_king(side = 'w' if self.side == 'b' else 'b', board = board)
+		king = get_king(side = 'w' if self.side == 'b' else 'b', board = state)
 		actions = self.get_actions(board)
 		if king.pos in [move.end_pos for move in actions]:
 			king.check=True
@@ -268,7 +271,6 @@ class Bishop():
 		state[self.pos[0]][self.pos[1]] = None
 		self.pos = pos
 		state[pos[0]][pos[1]] = self 
-
 		# Get the enemy kings position and see if hes in check
 		king = get_king(side = 'w' if self.side == 'b' else 'b', board = state)
 		actions = self.get_actions(board)
@@ -307,6 +309,7 @@ class Bishop():
 					if king.pos not in [move.end_pos for move in enemy_actions]:
 						valid_moves.append(action)
 				actions = valid_moves
+
 			return actions
 		
 	def __str__(self):
@@ -319,15 +322,15 @@ class Rook():
 		self.moved = False
 	
 	def move(self, move, board):
-		board = board.board
+		state = board.board
 		pos = move.end_pos
-		board[self.pos[0]][self.pos[1]] = None
+		state[self.pos[0]][self.pos[1]] = None
 		self.pos = pos
-		board[pos[0]][pos[1]] = self
+		state[pos[0]][pos[1]] = self
 		self.moved = True
 
 		# Get the enemy kings position and see if hes in check
-		king = get_king(side = 'w' if self.side == 'b' else 'b', board = board)
+		king = get_king(side = 'w' if self.side == 'b' else 'b', board = state)
 		actions = self.get_actions(board)
 		if king.pos in [move.end_pos for move in actions]:
 			king.check=True
@@ -451,7 +454,7 @@ class Pawn():
 			if 0 <= x+(1*mpl) < 8 and 0 <= y+n < 8:
 				if board.board[x+(1*mpl)][y+n] == None and isinstance(board.board[x][y+n], Pawn):
 					if board.board[x][y+n].side != self.side and board.board[x][y+n].first_move == True:
-						actions.append((x+(1*mpl), y+n))
+						actions.append(Move(self, self.pos, (x+(1*mpl), y+n)))
 		
 		if not checking_pins:
 			valid_moves = []
@@ -500,14 +503,12 @@ def get_vertical(peice, board):
 				actions.append(Move(peice, peice.pos, (i, y)))
 			break
 		actions.append(Move(peice, peice.pos, (i, y)))
-	
 	for i in [num for num in range(x)][::-1]:
 		if board[i][y] != None:
 			if board[i][y].side != peice.side:
 				actions.append(Move(peice, peice.pos, (i, y)))
 			break
-		actions.append(Move(peice, peice.posm (i, y)))
-
+		actions.append(Move(peice, peice.pos, (i, y)))
 	return actions
 
 def get_horizontal(peice, board):
