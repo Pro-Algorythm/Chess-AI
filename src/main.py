@@ -170,8 +170,6 @@ def get_best_move(board, turn):
     global depth
     depth -= 1
     actions = board.get_all_actions(side = turn)
-    if depth == 9: print(*[move.peice.side for move in actions])
-    terminality = board.is_terminal(turn = turn)
 
     
     best_move = None
@@ -190,10 +188,8 @@ def get_best_move(board, turn):
             else:
                 if best_move == None or ((best_move[1] >= 0 and turn == 'w') or (best_move[1] <= 0 and turn == 'b')):
                     best_move = (action, 0)
-            print("TEMINALLLL")
         if not depth <= 0:
             move = get_best_move(dummy, turn = 'w' if turn == 'b' else 'b')
-            print(move)
         else:
             move = (action, eval)
         
