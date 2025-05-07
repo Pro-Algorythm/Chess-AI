@@ -60,7 +60,7 @@ class Board():
 
         return moves
 
-    def is_terminal(self):
+    def is_terminal(self, turn):
         # Get the kings
         for row in self.board:
             for square in row:
@@ -69,20 +69,24 @@ class Board():
                     else: black_king = square
                 
         # Get both players actions
-        white_actions = len(self.get_all_actions(side = 'w'))
-        black_actions = len(self.get_all_actions(side = 'b'))
+        white_actions = self.get_all_actions(side = 'w')
+        black_actions = self.get_all_actions(side = 'b')
 
-        # Check for all results
-        if white_actions == 0 and not white_king.check:
+        # Check for checkmate
+        if len(white_actions) == 0 and white_king.check:
+            return 'b'
+        elif len(black_actions) == 0 and black_king.check:
+            return 'w'
+        
+        # Get actions for the side
+        actions = white_actions if turn == 'w' else black_actions
+
+        # Check for stalemate
+        if len(actions) == 0:
             return 0
-        elif white_actions == 0 and white_king.check:
-            return float('inf')
-        elif black_actions == 0 and not black_king.check:
-            return 0
-        elif black_actions == 0 and black_king.check:
-            return float('-inf')
-        else:
-            return False
+        
+        # Return false if board is not terminal
+        return False
 
     def get_util(self):
         # Get the material of both sides
@@ -111,10 +115,10 @@ class Board():
             [0 for i in range(8)],
             [0, 0, -0.5, -1, -1, -0.5, 0, 0],
             [0.5, 0.5, 0.75, 0.75, 0.75, 0.75, 0.5, 0.5],
-            [0.5, 0.5, 1, 2, 2, 1, 0.5, 0.5],
-            [0.5, 1, 2, 2, 2, 2, 1, 0.5],
-            [1, 1, 2.25, 2.25, 2.25, 2.25, 1, 1],
-            [2, 2, 2.75, 2.75, 2.75, 2.75, 2, 2],
+            [0.5, 0.5, 1, 1.5, 1.5, 1, 0.5, 0.5],
+            [0.5, 1, 1.5, 1.5, 1.5, 0.75, 1, 0.5],
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1.25 for i in range(8)],
             [10 for i in range(8)]
         ]
 
@@ -122,8 +126,8 @@ class Board():
             [0 for i in range(8)],
             [-1, -0.5, 0.75, 0.75, 0.75, 0.75, -0.5, -1],
             [-1.25, 1.5, 1.75, 1.75, 1.75, 1.75, 1.5, -1.25],
-            [-2.25, 2.5, 5, 5, 5, 5, 2.5, -2.25],
-            [-2.25, 2.5, 5, 5, 5, 5, 2.5, -2.25],
+            [-2.25, 2.5, 2, 2, 2, 2, 2.5, -2.25],
+            [-2.25, 2.5, 2, 2, 2, 2, 2.5, -2.25],
             [-1.25, 1.5, 1.75, 1.75, 1.75, 1.75, 1.5, -1.25],
             [-1, 0.5, 0.75, 0.75, 0.75, 0.75, 0.5, -1],
             [-1, 0.5, 0.75, 0.75, 0.75, 0.75, 0.5, -1],
@@ -131,18 +135,18 @@ class Board():
 
         bishop_pst = [
             [-1 for i in range(8)],
-            [-0.5, 3, 1, 1, 1, 1, 3, -0.5],
-            [-0.5, 1, 3, 1, 1, 3, 1, -0.5],
-            [-0.5, 1, 3, 1, 1, 3, 1, -0.5],
-            [-0.5, 1, 3, 1, 1, 3, 1, -0.5],
-            [-0.5, 1, 3, 1, 1, 3, 1, -0.5],
-            [-0.5, 1, 3, 1, 1, 3, 1, -0.5],
+            [-0.5, 1.5, 1, 1, 1, 1, 1.5, -0.5],
+            [-0.5, 1, 1.5, 1, 1, 1.5, 1, -0.5],
+            [-0.5, 1, 1.5, 1, 1, 1.5, 1, -0.5],
+            [-0.5, 1, 1.5, 1, 1, 1.5, 1, -0.5],
+            [-0.5, 1, 1.5, 1, 1, 1.5, 1, -0.5],
+            [-0.5, 1, 1.5, 1, 1, 1.5, 1, -0.5],
             [-1 for i in range(8)],
         ]
 
         king_pst = [
-            [3, 3, 3, 5, -2, 3, 5, 3],
-            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 2, -1, 1, 2, 1],
+            [-0.75 for i in range(8)],
             [-1 for i in range(8)],
             [-1 for i in range(8)],
             [-1 for i in range(8)],
