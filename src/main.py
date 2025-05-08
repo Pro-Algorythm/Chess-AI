@@ -10,6 +10,7 @@ def main():
     turn = 'w'
 
     board = Board()
+
     if not gui:
         player = input("Play as black (b) or white (w): ")
         ai = 'w' if player == 'b' else 'b'
@@ -55,6 +56,7 @@ def main():
             # Make the move and update the turn
             move.peice.move(move, board)
             turn = 'w' if turn == 'b' else 'b'
+    
     else:
         # Initialize the window
         pg.init()
@@ -77,8 +79,7 @@ def main():
         start_pos = None
         end_pos = None
         
-        running = True
-        while running:
+        while True:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                         running = False
@@ -119,6 +120,7 @@ def main():
                                 case 'p':
                                     window.blit(w_pawn, (144+(50*i), 45+(50*j)))
             pg.display.update()
+
             terminality = board.is_terminal(turn = turn)
             if terminality == 'w':
                 print("You Won.")
@@ -126,6 +128,7 @@ def main():
             if terminality == 'b':
                 print("AI won")
                 break
+
             if turn == 'w':
                 # For now player is always white
                 for event in pg.event.get():
@@ -151,7 +154,11 @@ def main():
                         if end_pos[1] - start_pos[1] > 1:
                             castle = 'kingside' if end_pos[1] > start_pos[1] else 'queenside'
                     
-                    # For now set promoted peice to None
+                    # For now all promotions are queens
+                    if isinstance(board.board[start_pos[0]][start_pos[1]], Pawn):
+                        if (board.board[start_pos[0]][start_pos[1]].side == 'w' and end_pos[0] == 7) or (board.board[start_pos[0]][start_pos[1]].side == 'b' and end_pos[0] == 1):
+                            promotion = 'q'
+
                     promotion = None
                     # Make the move object
                     move = Move(board.board[start_pos[0]][start_pos[1]], start_pos, end_pos, promoted_peice = promotion, castling = castle)
@@ -164,14 +171,12 @@ def main():
                     if (move.start_pos, move.end_pos, move.promoted_peice, move.castling) in [(action.start_pos, action.end_pos, action.promoted_peice, action.castling) for action in actions]:
                         board.board[move.start_pos[0]][move.start_pos[1]].move(move, board)
                         turn = 'w' if turn == 'b' else 'b'
-            # Apply changes
+
             else:
                 depth = 10
                 move = get_best_move(board, turn = turn)[0]
                 board.board[move.start_pos[0]][move.start_pos[1]].move(move, board)
-                turn = 'w' if turn == 'b' else 'b'
-                print('done ai')
-                     
+                turn = 'w' if turn == 'b' else 'b'                     
 
 def get_best_move(board, turn, alpha = None):
     global depth
@@ -191,21 +196,24 @@ def get_best_move(board, turn, alpha = None):
             eval = dummy.get_util()
 
         if (turn == 'w' and eval == float('inf')) or (turn == 'b' and eval == float('-inf')):
-            return action, eval
+            return (action, eval)
         elif not (turn == 'w' and eval == float('inf')) or not (turn == 'b' and eval == float('-inf')):
             if best_move == None:
                 best_move = (action, eval)
-
-        if not depth <= 0:
-            move = (action, get_best_move(dummy, turn = 'w' if turn == 'b' else 'b', alpha = alpha)[1])
         else:
-            move = (action, eval)
+            if not depth <= 0:
+                move = (action, get_best_move(dummy, turn = 'w' if turn == 'b' else 'b', alpha = alpha)[1])
+            else:
+                if terminality == 0:
+                    move = (action, eval)
+                else:
+                    move = (action, eval)
         
-        if best_move == None or ((eval > float(best_move[1]) and turn == 'w') or (eval < float(best_move[1]) and turn == 'b')):
-            best_move = move
-            
+            if best_move == None or ((eval > float(best_move[1]) and turn == 'w') or (eval < float(best_move[1]) and turn == 'b')):
+                best_move = move
+
         if alpha != None:
-            if (eval > alpha and turn == 'b') or (eval < alpha and turn == 'w'):
+            if (eval < alpha and turn == 'b') or (eval > alpha and turn == 'w'):
                 return (action, eval)
         alpha = best_move[1]
     

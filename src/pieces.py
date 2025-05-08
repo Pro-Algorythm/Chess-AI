@@ -83,6 +83,15 @@ class King():
 				king.move(move, dummy)
 				if king.pos not in [action.end_pos for action in dummy.get_all_actions(side = 'w' if self.side == 'b' else 'b')]:
 					actions.append(Move(self, self.pos, (x-1, y+1)))
+		# West
+		if enemy_king.pos not in [(x-1, y-1), (x-1,y), (x-1, y+1)]:
+			if y-1 >= 0 and (board.board[x][y-1] == None or board.board[x][y-1].side == ('w' if self.side == 'b' else 'b')):
+				dummy = deepcopy(board)
+				king = dummy.board[self.pos[0]][self.pos[1]]
+				move = Move(king, king.pos, (x, y-1))
+				king.move(move, dummy)
+				if king.pos not in [action.end_pos for action in dummy.get_all_actions(side = 'w' if self.side == 'b' else 'b')]:
+					actions.append(Move(self, self.pos, (x, y-1)))
 		
 					
 		# South East
