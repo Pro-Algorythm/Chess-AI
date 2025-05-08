@@ -67,23 +67,19 @@ class Board():
                 if square != None and isinstance(square, King):
                     if square.side == 'w': white_king = square
                     else: black_king = square
-                
-        # Get both players actions
-        white_actions = self.get_all_actions(side = 'w', include_king = True)
-        black_actions = self.get_all_actions(side = 'b', include_king = True)
-
+            
+        actions = self.get_all_actions(side = 'w', include_king = True) if turn == 'w' else self.get_all_actions(side = 'b', include_king = True)
         # Check for checkmate
-        if len(white_actions) == 0 and white_king.check:
+        if len(actions) == 0 and (white_king.check and turn == 'w'):
             return 'b'
-        elif len(black_actions) == 0 and black_king.check:
+        elif len(actions) == 0 and (black_king.check and turn == 'b'):
             return 'w'
         
         # Get actions for the side
-        actions = white_actions if turn == 'w' else black_actions
 
         # Check for stalemate
         if len(actions) == 0:
-            return 0
+            return 'stalemate'
         
         # Return false if board is not terminal
         return False
@@ -107,52 +103,62 @@ class Board():
                 black_space += 1
 
         # Get the evaluation and return it
-        eval = (white_material + white_space*0.25) - (black_material - black_space*0.25)
+        
+        eval = (white_material + white_space*0.25) - (black_material + black_space*0.25)
+
+        print(self)
+        print(f"White material: {white_material}   Black material: {black_material}")
+        print(f"White space: {white_space*0.25}  Black space: {black_space*0.25}")
+        print(f"Total evaluation: {eval}")
+
         return eval
     
     def get_material(self, side):
         pawn_pst = [
-            [0 for i in range(8)],
-            [0, 0, -0.5, -1, -1, -0.5, 0, 0],
-            [0.5, 0.5, 0.75, 0.75, 0.75, 0.75, 0.5, 0.5],
-            [0.5, 0.5, 1, 1.5, 1.5, 1, 0.5, 0.5],
-            [0.5, 1, 1.5, 1.5, 1.5, 0.75, 1, 0.5],
-            [1, 1, 1, 1, 1, 1, 1, 1],
-            [1.25 for i in range(8)],
-            [10 for i in range(8)]
+            [0,   0,   0,   0,   0,   0,   0,   0],     # Rank 1 (index 0)
+            [5,  10, 10,  20,  20, 10, 10,  5],         # Rank 2
+            [5,  10, 15,  25,  25, 15, 10,  5],         # Rank 3
+            [10, 20, 20,  30,  30, 20, 20, 10],         # Rank 4
+            [20, 30, 30,  40,  40, 30, 30, 20],         # Rank 5
+            [30, 40, 40,  50,  50, 40, 40, 30],         # Rank 6
+            [40, 50, 50,  60,  60, 50, 50, 40],         # Rank 7
+            [100, 100, 100, 100, 100,  100,  100,  100],         # Rank 8 (index 7, promotion rank)
         ]
+
 
         knight_pst = [
-            [0 for i in range(8)],
-            [-1, -0.5, 0.75, 0.75, 0.75, 0.75, -0.5, -1],
-            [-1.25, 1.5, 1.75, 1.75, 1.75, 1.75, 1.5, -1.25],
-            [-2.25, 2.5, 2, 2, 2, 2, 2.5, -2.25],
-            [-2.25, 2.5, 2, 2, 2, 2, 2.5, -2.25],
-            [-1.25, 1.5, 1.75, 1.75, 1.75, 1.75, 1.5, -1.25],
-            [-1, 0.5, 0.75, 0.75, 0.75, 0.75, 0.5, -1],
-            [-1, 0.5, 0.75, 0.75, 0.75, 0.75, 0.5, -1],
+            [-50, -40, -30, -30, -30, -30, -40, -50],
+            [-40, -20,   0,   5,   5,   0, -20, -40],
+            [-30,   5,  10,  15,  15,  10,   5, -30],
+            [-30,   0,  15,  20,  20,  15,   0, -30],
+            [-30,   5,  15,  20,  20,  15,   5, -30],
+            [-30,   0,  10,  15,  15,  10,   0, -30],
+            [-40, -20,   0,   0,   0,   0, -20, -40],
+            [-50, -40, -30, -30, -30, -30, -40, -50],
         ]
+
 
         bishop_pst = [
-            [-1 for i in range(8)],
-            [-0.5, 1.5, 1, 1, 1, 1, 1.5, -0.5],
-            [-0.5, 1, 1.5, 1, 1, 1.5, 1, -0.5],
-            [-0.5, 1, 1.5, 1, 1, 1.5, 1, -0.5],
-            [-0.5, 1, 1.5, 1, 1, 1.5, 1, -0.5],
-            [-0.5, 1, 1.5, 1, 1, 1.5, 1, -0.5],
-            [-0.5, 1, 1.5, 1, 1, 1.5, 1, -0.5],
-            [-1 for i in range(8)],
+            [-20, -10, -10, -10, -10, -10, -10, -20],
+            [-10,   5,   0,   0,   0,   0,   5, -10],
+            [-10,  10,  10,  10,  10,  10,  10, -10],
+            [-10,   0,  10,  10,  10,  10,   0, -10],
+            [-10,   5,   5,  10,  10,   5,   5, -10],
+            [-10,   0,   5,  10,  10,   5,   0, -10],
+            [-10,   0,   0,   0,   0,   0,   0, -10],
+            [-20, -10, -10, -10, -10, -10, -10, -20],
         ]
 
+
         king_pst = [
-            [1, 1, 1, 2, -1, 1, 2, 1],
-            [-0.75 for i in range(8)],
-            [-1 for i in range(8)],
-            [-1 for i in range(8)],
-            [-1 for i in range(8)],
-            [-1 for i in range(8)],
-            [-1 for i in range(8)],
-            [0 for i in range(8)]
+            [-30, -40, -40, -50, -50, -40, -40, -30],
+            [-30, -40, -40, -50, -50, -40, -40, -30],
+            [-30, -40, -40, -50, -50, -40, -40, -30],
+            [-30, -40, -40, -50, -50, -40, -40, -30],
+            [-20, -30, -30, -40, -40, -30, -30, -20],
+            [-10, -20, -20, -20, -20, -20, -20, -10],
+            [20,  20,   0,   0,   0,   0,  20,  20],
+            [20,  30,  10,   0,   0,  10,  30,  20],
         ]
 
         # Flip the PST's for black
@@ -169,9 +175,31 @@ class Board():
                     if sq.side == side:
                         if isinstance(sq, Queen): material+=9
                         if isinstance(sq, Rook): material+=5
-                        if isinstance(sq, Knight): material+= 3 + knight_pst[sq.pos[0]][sq.pos[1]]
-                        if isinstance(sq, Bishop): material+= 3 + bishop_pst[sq.pos[0]][sq.pos[1]]
-                        if isinstance(sq, Pawn): material+= 1 + pawn_pst[sq.pos[0]][sq.pos[1]]
+                        if isinstance(sq, Knight): material+= 3
+                        if isinstance(sq, Bishop): material+= 3
+                        if isinstance(sq, Pawn): material+= 1
+        if material <= 14:
+            king_pst = [
+                [-50, -40, -30, -20, -20, -30, -40, -50],
+                [-30, -20, -10,   0,   0, -10, -20, -30],
+                [-30, -10,  20,  30,  30,  20, -10, -30],
+                [-30, -10,  30,  40,  40,  30, -10, -30],
+                [-30, -10,  30,  40,  40,  30, -10, -30],
+                [-30, -10,  20,  30,  30,  20, -10, -30],
+                [-30, -30,   0,   0,   0,   0, -30, -30],
+                [-50, -30, -30, -30, -30, -30, -30, -50],
+            ]
+        material = 0
+        for row in self.board:
+            for sq in row:
+                if sq != None:
+                    if sq.side == side:
+                        if isinstance(sq, Queen): material+=9
+                        if isinstance(sq, Rook): material+=5
+                        if isinstance(sq, Knight): material+= 3 + knight_pst[sq.pos[0]][sq.pos[1]]*0.01
+                        if isinstance(sq, Bishop): material+= 3 + bishop_pst[sq.pos[0]][sq.pos[1]]*0.01
+                        if isinstance(sq, Pawn): material+= 1 + pawn_pst[sq.pos[0]][sq.pos[1]]*0.01
+                        if isinstance(sq, King): material+= king_pst[sq.pos[0]][sq.pos[1]]
         return material
 
     def __str__(self):

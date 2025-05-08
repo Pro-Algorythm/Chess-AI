@@ -128,6 +128,9 @@ def main():
             if terminality == 'b':
                 print("AI won")
                 break
+            if terminality == 'stalemate':
+                print("Stalemate")
+                break
 
             if turn == 'w':
                 # For now player is always white
@@ -158,6 +161,7 @@ def main():
                     if isinstance(board.board[start_pos[0]][start_pos[1]], Pawn):
                         if (board.board[start_pos[0]][start_pos[1]].side == 'w' and end_pos[0] == 7) or (board.board[start_pos[0]][start_pos[1]].side == 'b' and end_pos[0] == 1):
                             promotion = 'q'
+                            print(promotion)
 
                     promotion = None
                     # Make the move object
@@ -181,7 +185,7 @@ def main():
 def get_best_move(board, turn, alpha = None):
     global depth
     depth -= 1
-    actions = board.get_all_actions(side = turn)
+    actions = board.get_all_actions(side = turn, include_king = True)
 
     best_move = None
     for action in actions:
@@ -197,26 +201,27 @@ def get_best_move(board, turn, alpha = None):
 
         if (turn == 'w' and eval == float('inf')) or (turn == 'b' and eval == float('-inf')):
             return (action, eval)
-        elif not (turn == 'w' and eval == float('inf')) or not (turn == 'b' and eval == float('-inf')):
+        elif (turn == 'w' and eval == float('-inf')) or (turn == 'b' and eval == float('inf')):
             if best_move == None:
                 best_move = (action, eval)
         else:
             if not depth <= 0:
-                move = (action, get_best_move(dummy, turn = 'w' if turn == 'b' else 'b', alpha = alpha)[1])
+                next_eval = get_best_move(dummy, turn = 'w' if turn == 'b' else 'b', alpha = alpha)[1]
             else:
-                if terminality == 0:
-                    move = (action, eval)
-                else:
-                    move = (action, eval)
+                next_eval = eval
+            eval = next_eval
+            move = (action, eval)
         
-            if best_move == None or ((eval > float(best_move[1]) and turn == 'w') or (eval < float(best_move[1]) and turn == 'b')):
+            if best_move == None or ((move[1] > float(best_move[1]) and turn == 'w') or (move[1] < float(best_move[1]) and turn == 'b')):
                 best_move = move
 
         if alpha != None:
             if (eval < alpha and turn == 'b') or (eval > alpha and turn == 'w'):
                 return (action, eval)
         alpha = best_move[1]
-    
+    if best_move == None:
+        print(board)
+        print(turn)
     return best_move
 
 
