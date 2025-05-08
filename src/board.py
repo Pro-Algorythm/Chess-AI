@@ -45,16 +45,16 @@ class Board():
         # Set the board
         self.board = board
          
-    def get_all_actions(self, side):
+    def get_all_actions(self, side, include_king = False):
         # Initialize moves array
         moves = []
 
         # Loop through the whole board storing all actions of a side
-        for i in self.board:
-            for j in i:
-                if j != None:
-                    if j.side == side and not isinstance(j, King):
-                        actions = j.get_actions(self)
+        for row in self.board:
+            for square in row:
+                if square != None:
+                    if square.side == side and (include_king or (not include_king and not isinstance(square, King))):
+                        actions = square.get_actions(self)
                         if len(actions) != 0:
                             moves.extend(actions)
 
@@ -69,8 +69,8 @@ class Board():
                     else: black_king = square
                 
         # Get both players actions
-        white_actions = self.get_all_actions(side = 'w')
-        black_actions = self.get_all_actions(side = 'b')
+        white_actions = self.get_all_actions(side = 'w', include_king = True)
+        black_actions = self.get_all_actions(side = 'b', include_king = True)
 
         # Check for checkmate
         if len(white_actions) == 0 and white_king.check:
@@ -107,7 +107,7 @@ class Board():
                 black_space += 1
 
         # Get the evaluation and return it
-        eval = (white_material + white_space*0.5) - (black_material - black_space*0.5)
+        eval = (white_material + white_space*0.25) - (black_material - black_space*0.25)
         return eval
     
     def get_material(self, side):

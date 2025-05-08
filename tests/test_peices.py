@@ -139,8 +139,9 @@ def test_pawns():
 
     # Captures
     queen = board.board[7][3]
-    queen.move(Move(queen, queen.pos, (2, 4)), board)
-    assert len(pawn.get_actions(board)) == 3
+    queen.move(Move(queen, queen.pos, (4, 4)), board)
+    pawn.move(Move(pawn, pawn.pos, (3,3)), board)
+    assert len(pawn.get_actions(board)) == 2
 
     # En-Passant
     pawn.move(Move(pawn, pawn.pos, (4, 3)), board)

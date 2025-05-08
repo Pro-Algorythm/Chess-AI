@@ -49,13 +49,13 @@ class King():
 					actions.append(Move(self, self.pos, (x+1, y-1)))
 		# East
 		if enemy_king.pos not in [(x-1, y-2), (x, y-2), (x+1, y-2)]:
-			if y-1 >= 0 and (board.board[x-1][y] == None or board.board[x][y-1].side == ('w' if self.side == 'b' else 'b')):
+			if y+1 < 8 and (board.board[x][y+1] == None or board.board[x][y+1].side == ('w' if self.side == 'b' else 'b')):
 				dummy = deepcopy(board)
 				king = dummy.board[self.pos[0]][self.pos[1]]
-				move = Move(king, king.pos, (x, y-1))
+				move = Move(king, king.pos, (x, y+1))
 				king.move(move, dummy)
 				if king.pos not in [action.end_pos for action in dummy.get_all_actions(side = 'w' if self.side == 'b' else 'b')]:
-					actions.append(Move(self, self.pos, (x, y-1)))
+					actions.append(Move(self, self.pos, (x, y+1)))
 		# North West
 		if enemy_king.pos not in [(x-2, y), (x-2, y-1), (x-2, y-2), (x-1, y-2), (x, y-2)]:
 			if x-1 >=  0 and y-1 >= 0 and (board.board[x-1][y-1] == None or board.board[x-1][y-1].side == ('w' if self.side == 'b' else 'b')):
@@ -83,15 +83,8 @@ class King():
 				king.move(move, dummy)
 				if king.pos not in [action.end_pos for action in dummy.get_all_actions(side = 'w' if self.side == 'b' else 'b')]:
 					actions.append(Move(self, self.pos, (x-1, y+1)))
-		# East
-		if enemy_king.pos not in [(x-1, y+2), (x, y+2), (x+1, y+2)]:
-			if y+1 < 8 and (board.board[x][y+1] == None or board.board[x][y+1].side == ('w' if self.side == 'b' else 'b')):
-				dummy = deepcopy(board)
-				king = dummy.board[self.pos[0]][self.pos[1]]
-				move = Move(king, king.pos, (x, y+1))
-				king.move(move, dummy)
-				if king.pos not in [action.end_pos for action in dummy.get_all_actions(side = 'w' if self.side == 'b' else 'b')]:
-					actions.append(Move(self, self.pos, (x, y+1)))
+		
+					
 		# South East
 		if enemy_king.pos not in [(x, y+2), (x+1, y+2), (x+2, y+2), (x+2, y), (x+2, y+1)]:
 			if x+1 < 8 and y+1 < 8 and (board.board[x+1][y+1] == None or board.board[x+1][y+1].side == ('w' if self.side == 'b' else 'b')):
@@ -101,6 +94,7 @@ class King():
 				king.move(move, dummy)
 				if king.pos not in [action.end_pos for action in dummy.get_all_actions(side = 'w' if self.side == 'b' else 'b')]:
 					actions.append(Move(self, self.pos, (x+1, y+1)))
+
 		enemy_actions = [move.end_pos for move in board.get_all_actions(side = 'w' if self.side == 'b' else 'b')]
 		if self.side == 'w':
 			# Castling kingside
@@ -122,7 +116,7 @@ class King():
 			# Castling queen side
 			if not self.moved and isinstance(board.board[7][7], Rook) and not self.check:
 				if not board.board[7][7].moved:
-					if all(square == None for square in [board.board[x][y-1], board.board[x][y-2], board.board[x][y-3]]) and (x, y+1) not in enemy_actions and (x, y+2) not in enemy_actions and (x, y+3) not in enemy_actions:
+					if all(square == None for square in [board.board[x][y-1], board.board[x][y-2], board.board[x][y-3]]) and (x, y-1) not in enemy_actions and (x, y-2) not in enemy_actions and (x, y-3) not in enemy_actions:
 						actions.append(Move(self, self.pos, (x, y-2), castling = 'queenside'))
 		return actions
 
@@ -446,7 +440,7 @@ class Pawn():
 							actions.append(Move(self, self.pos, (x+(1*mpl), y+n), 'b'))
 							actions.append(Move(self, self.pos, (x+(1*mpl), y+n), 'r'))
 						else:
-							actions.append(Move(self, self.pos, (x+(1*mpl), y)))
+							actions.append(Move(self, self.pos, (x+(1*mpl), y+n)))
 
 		# En passant captures
 		for i in range(2):
